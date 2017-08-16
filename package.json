@@ -1,0 +1,21 @@
+{
+  "name": "spotifyapp",
+  "version": "1.0.0",
+  "description": "App using Spotify API for creation and modification of a playlist",
+  "main": "app.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "spotifyApp"
+  },
+  "author": "Matthew White",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.3",
+    "express": "^4.15.4",
+    "querystring": "^0.2.0",
+    "request": "^2.81.0"
+  }
+}
