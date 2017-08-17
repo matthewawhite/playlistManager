@@ -1,65 +1,65 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Playlist Manager</title>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    <style type="text/css">
-      #login, #loggedin {
-        display: none;
-      }
+    <head>
+        <title>Playlist Manager</title>
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        <style type="text/css">
+            #login, #loggedin {
+                display: none;
+            }
 
-      .text-overflow {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 500px;
-      }
-    </style>
-  </head>
+            .text-overflow {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                width: 500px;
+            }
+        </style>
+    </head>
 
-  <body>
-    <div class="container">
-      <div id="login">
-        <h1 class='loginTitle'>Playlist Manager</h1>
-        <a href="/login" class="btn btn-primary">Log in with Spotify</a>
-      </div>
-      <div id="loggedin">
-        <div id="user-profile"> <!-- Creating div for template -->
+    <body>
+        <div class="container">
+            <div id="login">
+                <h1 class='loginTitle'>Playlist Manager</h1>
+                <a href="/login" class="btn btn-primary">Log in with Spotify</a>
+            </div>
+            <div id="loggedin">
+                <div id="user-profile"> <!-- Creating div for template -->
+                </div>
+                <div id="oauth">        <!-- Creating div for template -->
+                </div>
+                <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>
+                <button class="btn btn-default" id="printPlaylists">Print playlists</button>
+            </div>
         </div>
-        <div id="oauth">        <!-- Creating div for template -->
-        </div>
-        <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>
-        <button class="btn btn-default" id="printPlaylists">Print playlists</button>
-      </div>
-    </div>
 
     <style>
-      body {
-          background-image: url("lakeBackground.jpg");
-          background-repeat: no-repeat;
-          background-position: middle top;
-          background-attachment: fixed;
-          background-size: cover;
-      }
+        body {
+            background-image: url("lakeBackground.jpg");
+            background-repeat: no-repeat;
+            background-position: middle top;
+            background-attachment: fixed;
+            background-size: cover;
+        }
 
-      .loginTitle {
-        position: absolute;
-        color: rgb(0, 0, 0);
-        left: 30vw;
-        top: 20vh;
-        font-size: 500%;
-        font-family: fantasy;
-      }
+        .loginTitle {
+            position: absolute;
+            color: rgb(0, 0, 0);
+            left: 30vw;
+            top: 20vh;
+            font-size: 500%;
+            font-family: fantasy;
+        }
 
-      .btn-primary {
-        position: absolute;
-        left: 40vw;
-        top: 34vh;
-        font-size: 150%;
-        background-color: rgb(106,227,104); /* Spotify green color */
-        border-color: rgb(106,227,104);
-        color: rgb(0, 0, 0);
-      }
+        .btn-primary {
+            position: absolute;
+            left: 40vw;
+            top: 34vh;
+            font-size: 150%;
+            background-color: rgb(106,227,104); /* Spotify green color */
+            border-color: rgb(106,227,104);
+            color: rgb(0, 0, 0);
+        }
     </style>
 
     <!--
@@ -69,274 +69,276 @@
 
     <!-- Script to create user profile div template given login data -->
     <script id="user-profile-template" type="text/x-handlebars-template">
-      <h1>Logged in as {{display_name}}</h1>
-      <div class="media">
-        <div class="pull-left">
-          <img class="media-object" width="150" src="{{images.0.url}}" />
+        <h1>Logged in as {{display_name}}</h1>
+        <div class="media">
+            <div class="pull-left">
+                <img class="media-object" width="150" src="{{images.0.url}}" />
+            </div>
+            <div class="media-body">
+                <dl class="dl-horizontal">
+                    <dt>Display name</dt><dd class="clearfix">{{display_name}}</dd>
+                    <dt>Id</dt><dd>{{id}}</dd>
+                    <dt>Email</dt><dd>{{email}}</dd>
+                    <dt>Spotify URI</dt><dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
+                    <dt>Link</dt><dd><a href="{{href}}">{{href}}</a></dd>
+                    <dt>Profile Image</dt><dd class="clearfix"><a href="{{images.0.url}}">{{images.0.url}}</a></dd>
+                    <dt>Country</dt><dd>{{country}}</dd>
+                </dl>
+            </div>
         </div>
-        <div class="media-body">
-          <dl class="dl-horizontal">
-            <dt>Display name</dt><dd class="clearfix">{{display_name}}</dd>
-            <dt>Id</dt><dd>{{id}}</dd>
-            <dt>Email</dt><dd>{{email}}</dd>
-            <dt>Spotify URI</dt><dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
-            <dt>Link</dt><dd><a href="{{href}}">{{href}}</a></dd>
-            <dt>Profile Image</dt><dd class="clearfix"><a href="{{images.0.url}}">{{images.0.url}}</a></dd>
-            <dt>Country</dt><dd>{{country}}</dd>
-          </dl>
-        </div>
-      </div>
     </script>
 
     <!-- Script to create oAuth div template given login data -->
     <script id="oauth-template" type="text/x-handlebars-template">
-      <h2>oAuth info</h2>
-      <dl class="dl-horizontal">
-        <dt>Access token</dt><dd class="text-overflow">{{access_token}}</dd>
-        <dt>Refresh token</dt><dd class="text-overflow">{{refresh_token}}></dd>
-      </dl>
+        <h2>oAuth info</h2>
+        <dl class="dl-horizontal">
+            <dt>Access token</dt><dd class="text-overflow">{{access_token}}</dd>
+            <dt>Refresh token</dt><dd class="text-overflow">{{refresh_token}}></dd>
+        </dl>
     </script>
 
-    <!-- Script used to handle login hashes and data -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script>
-      var userEndpoint = 'https://api.spotify.com/v1/users/';
-      var todaysDate = new Date();
-      var oldDate = processOldDate(todaysDate);
-      var playlistId;
+        var userEndpoint = 'https://api.spotify.com/v1/users/';
+        var todaysDate = new Date();
+        var oldDate = processOldDate(todaysDate, 7);
+        var playlistId;
 
-      function getUserData(access_token) {
-        $.ajax({
-            type: 'GET',
-            url: 'https://api.spotify.com/v1/me',
-            headers: {
-              'Authorization': 'Bearer ' + access_token
-            },
-            success: function(response) {
-              userEndpoint += response.id;
-              getPlaylists(access_token);
-            },
-            error: function(response) {
-                console.log("ERROR!");
-                console.log(response);
-            }
-        });
-      }
-
-      function getPlaylists(access_token) {
-        var playlists;
-        var contains = false;
-        $.ajax({
-            type: 'GET',
-            url: userEndpoint + '/playlists',
-            headers: {
-              'Authorization': 'Bearer ' + access_token
-            },
-            success: function(response) {
-                playlists = response.items;
-
-                for (var i = 0; i < playlists.length; i++) {
-                    if (playlists[i].name === "Recent Songs") {
-                        contains = true;
-                        playlistId = playlists[i].id;
-                    }
-                }
-
-                handlePlaylist(access_token, contains);
-            },
-            error: function(response) {
-                console.log("ERROR!");
-                console.log(response);
-            }
-        });
-      }
-
-      function handlePlaylist(access_token, contains) {
-          if (contains) {
-              deleteSongs(access_token);
-              getRecentSongs(access_token, 0);
-          } else {
-              var playlistData = {
-                  'name': 'Recent Songs',
-                  'description': 'Songs added to My Songs in past week'
-              };
-
-              $.ajax({
-                  type: 'POST',
-                  url: userEndpoint + '/playlists',
-                  data: JSON.stringify(playlistData),
-                  headers: {
-                      'Authorization': 'Bearer ' + access_token,
-                      'Content-type': 'application/json'
-                  },
-                  success: function(response) {
-                      playlistId = response.id;
-                      getRecentSongs(access_token, 0);
-                  },
-                  error: function(response) {
-                    console.log("ERROR!");
-                    console.log(response);
-                  }
-              });
-          }
-      }
-
-      function getRecentSongs(access_token, offset) {
-          var recentSongs;
-
-          $.ajax({
-              type: 'GET',
-              url: 'https://api.spotify.com/v1/me/tracks',
-              headers: {
-                  'Authorization': 'Bearer ' + access_token
-              },
-              data: { 'limit': 50, 'offset': offset },
-              success: function(response) {
-                  recentSongs = response.items;
-
-                  var lastDay = recentSongs[49].added_at.substring(8, 10);
-                  lastDay = parseInt(lastDay);
-
-                  if (lastDay < oldDate) {
-                    recentSongs = binaryDateSearch(recentSongs);
-                  }
-
-                  addSongs(access_token, recentSongs);
-              },
-              error: function(response) {
-                console.log("ERROR!");
-                console.log(response);
-              }
-          });
-      }
-
-      function processOldDate(todaysDate) {
-          var month = todaysDate.getMonth();
-          var year = todaysDate.getFullYear();
-          var monthLength;
-
-          if (year % 4 == 0)
-              monthLength = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-          else
-              monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-          var day = todaysDate.getDate();
-          oldDate = (mod((day - 8), monthLength[mod(month - 1, 12)])) + 1;
-          return oldDate;
-      }
-
-      function binaryDateSearch(songs) {
-
-      }
-
-      function addSongs(access_token, songs) {
-          console.log(songs);
-          var songURIs = [];
-          for (var i = 0; i < songs.length; i++) {
-            songURIs[i] = songs[i].track.uri;
-          }
-          console.log(songURIs);
-
-          $.ajax({
-              type: 'POST',
-              url: userEndpoint + '/playlists/' + playlistId + '/tracks',
-              headers: {
-                  'Authorization': 'Bearer ' + access_token,
-                  'content-type': 'application/json'
-              },
-              data: JSON.stringify(songURIs),
-              success: function(response) {
-                  console.log("Success!");
-              },
-              error: function(reponse) {
-                  console.log(response);
-              }
-          });
-      }
-
-      function deleteSongs(access_token) {
-
-      }
-
-      // Fix for Javascript not properly handling negative modulus
-      function mod(n, m) {
-        return ((n % m) + m) % m;
-      }
-
-      // BELOW IS CODE PROVIDED BY SPOTIFY, ENTRANCE TO PROGRAM
-
-      (function() {
-        /**
-         * Obtains parameters from the hash of the URL
-         * @return Object
-         */
-        function getHashParams() {
-            var hashParams = {};
-            var e, r = /([^&;=]+)=?([^&;]*)/g,
-                q = window.location.hash.substring(1);
-            while ( e = r.exec(q)) {
-                hashParams[e[1]] = decodeURIComponent(e[2]);
-            }
-            return hashParams;
-        }
-
-        var userProfileSource = document.getElementById('user-profile-template').innerHTML,
-            userProfileTemplate = Handlebars.compile(userProfileSource),
-            userProfilePlaceholder = document.getElementById('user-profile');
-        var oauthSource = document.getElementById('oauth-template').innerHTML,
-            oauthTemplate = Handlebars.compile(oauthSource),
-            oauthPlaceholder = document.getElementById('oauth');
-        var params = getHashParams();
-        var access_token = params.access_token,
-            refresh_token = params.refresh_token,
-            error = params.error;
-
-        if (error) {
-          alert('There was an error during the authentication');
-        } else {
-          if (access_token) {
-            // render oauth info
-            oauthPlaceholder.innerHTML = oauthTemplate({
-              access_token: access_token,
-              refresh_token: refresh_token
-            });
+        function getUserData(access_token) {
             $.ajax({
+                type: 'GET',
                 url: 'https://api.spotify.com/v1/me',
                 headers: {
-                  'Authorization': 'Bearer ' + access_token
+                    'Authorization': 'Bearer ' + access_token
                 },
                 success: function(response) {
-                  userProfilePlaceholder.innerHTML = userProfileTemplate(response);
-                  $('#login').hide();
-                  $('#loggedin').show();
+                    userEndpoint += response.id;
+                    getPlaylists(access_token);
+                },
+                error: function(response) {
+                    console.log("ERROR!");
+                    console.log(response);
                 }
             });
-          } else {
-              // render initial screen
-              $('#login').show();
-              $('#loggedin').hide();
-          }
-
-          document.getElementById('obtain-new-token').addEventListener('click', function() {
-            $.ajax({
-              url: '/refresh_token',
-              data: {
-                'refresh_token': refresh_token
-              }
-            }).done(function(data) {
-              access_token = data.access_token;
-              oauthPlaceholder.innerHTML = oauthTemplate({
-                access_token: access_token,
-                refresh_token: refresh_token
-              });
-            });
-          }, false);
         }
 
-        getUserData(access_token);
-      })();
-    </script>
+        function getPlaylists(access_token) {
+            var playlists;
+            var contains = false;
+            $.ajax({
+                type: 'GET',
+                url: userEndpoint + '/playlists',
+                headers: {
+                    'Authorization': 'Bearer ' + access_token
+                },
+                success: function(response) {
+                    playlists = response.items;
 
+                    for (var i = 0; i < playlists.length; i++) {
+                        if (playlists[i].name === "Recent Songs") {
+                            contains = true;
+                            playlistId = playlists[i].id;
+                        }
+                    }
+
+                    handlePlaylist(access_token, contains);
+                },
+                error: function(response) {
+                    console.log("ERROR!");
+                    console.log(response);
+                }
+            });
+        }
+
+        function handlePlaylist(access_token, contains) {
+            if (contains) {
+                deleteSongs(access_token);
+                getRecentSongs(access_token, 0);
+            } else {
+                var playlistData = {
+                    'name': 'Recent Songs',
+                    'description': 'Songs added to My Songs in past week'
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    url: userEndpoint + '/playlists',
+                    data: JSON.stringify(playlistData),
+                    headers: {
+                        'Authorization': 'Bearer ' + access_token,
+                        'Content-type': 'application/json'
+                    },
+                    success: function(response) {
+                        playlistId = response.id;
+                        getRecentSongs(access_token, 0);
+                    },
+                    error: function(response) {
+                      console.log("ERROR!");
+                      console.log(response);
+                    }
+                });
+            }
+        }
+
+        function getRecentSongs(access_token, offset) {
+            var recentSongs;
+
+            $.ajax({
+                type: 'GET',
+                url: 'https://api.spotify.com/v1/me/tracks',
+                headers: {
+                    'Authorization': 'Bearer ' + access_token
+                },
+                data: { 'limit': 50, 'offset': offset },
+                success: function(response) {
+                    recentSongs = response.items;
+
+                    var lastDay = getSongDay(recentSongs[49]);
+
+                    if (lastDay < oldDate) { // Fix logic
+                        recentSongs = dateRange(recentSongs);
+                    }
+
+                    addSongs(access_token, recentSongs);
+                },
+                error: function(response) {
+                    console.log("ERROR!");
+                    console.log(response);
+                }
+            });
+        }
+
+        function dateRange(songs) {
+            var songsRange = [];
+            for (var i = 0; i < songs.length; i++) {
+                if (getSongDay(songs[i]))
+            }
+        }
+
+        function addSongs(access_token, songs) {
+            var songURIs = [];
+            for (var i = 0; i < songs.length; i++) {
+                songURIs[i] = songs[i].track.uri;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: userEndpoint + '/playlists/' + playlistId + '/tracks',
+                headers: {
+                    'Authorization': 'Bearer ' + access_token,
+                    'content-type': 'application/json'
+                },
+                data: JSON.stringify(songURIs),
+                success: function(response) {
+                    console.log('Success');
+                },
+                error: function(reponse) {
+                    console.log(response);
+                }
+            });
+        }
+
+        function deleteSongs(access_token) {
+
+        }
+
+        function processOldDate(todaysDate, numDays) {
+            var month = todaysDate.getMonth();
+            var year = todaysDate.getFullYear();
+            var monthLength;
+
+            if (year % 4 == 0)
+                monthLength = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            else
+                monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+            var day = todaysDate.getDate();
+            oldDate = (mod((day - numDays - 1), monthLength[mod(month - 1, 12)])) + 1;
+            return oldDate;
+        }
+
+        function getSongDay(song) {
+            return parseInt(song.added_at.substring(8, 10));
+        }
+
+        // Fix for Javascript not properly handling negative modulus
+        function mod(n, m) {
+            return ((n % m) + m) % m;
+        }
+
+        // BELOW IS CODE PROVIDED BY SPOTIFY, ENTRANCE TO PROGRAM
+
+        (function() {
+            /**
+             * Obtains parameters from the hash of the URL
+             * @return Object
+             */
+            function getHashParams() {
+                var hashParams = {};
+                var e, r = /([^&;=]+)=?([^&;]*)/g,
+                    q = window.location.hash.substring(1);
+                while ( e = r.exec(q)) {
+                    hashParams[e[1]] = decodeURIComponent(e[2]);
+                }
+                return hashParams;
+            }
+
+            var userProfileSource = document.getElementById('user-profile-template').innerHTML,
+                userProfileTemplate = Handlebars.compile(userProfileSource),
+                userProfilePlaceholder = document.getElementById('user-profile');
+            var oauthSource = document.getElementById('oauth-template').innerHTML,
+                oauthTemplate = Handlebars.compile(oauthSource),
+                oauthPlaceholder = document.getElementById('oauth');
+            var params = getHashParams();
+            var access_token = params.access_token,
+                refresh_token = params.refresh_token,
+                error = params.error;
+
+            if (error) {
+                alert('There was an error during the authentication');
+            } else {
+                if (access_token) {
+                    // render oauth info
+                    oauthPlaceholder.innerHTML = oauthTemplate({
+                      access_token: access_token,
+                      refresh_token: refresh_token
+                    });
+                    $.ajax({
+                        url: 'https://api.spotify.com/v1/me',
+                        headers: {
+                            'Authorization': 'Bearer ' + access_token
+                        },
+                        success: function(response) {
+                            userProfilePlaceholder.innerHTML = userProfileTemplate(response);
+                            $('#login').hide();
+                            $('#loggedin').show();
+                        }
+                    });
+                } else {
+                    // render initial screen
+                    $('#login').show();
+                    $('#loggedin').hide();
+                }
+
+                document.getElementById('obtain-new-token').addEventListener('click', function() {
+                    $.ajax({
+                        url: '/refresh_token',
+                        data: {
+                            'refresh_token': refresh_token
+                        }
+                    }).done(function(data) {
+                        access_token = data.access_token;
+                        oauthPlaceholder.innerHTML = oauthTemplate({
+                            access_token: access_token,
+                            refresh_token: refresh_token
+                        });
+                    });
+                }, false);
+            }
+
+            getUserData(access_token);
+        })();
+    </script>
   </body>
 </html>
