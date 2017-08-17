@@ -103,7 +103,8 @@
     <script>
       var userEndpoint = 'https://api.spotify.com/v1/users/';
       var todaysDate = new Date();
-      console.log(todaysDate);
+      var oldDate = processOldDate(todaysDate);
+      var playlistId;
 
       function getUserData(access_token) {
         $.ajax({
@@ -136,8 +137,10 @@
                 playlists = response.items;
 
                 for (var i = 0; i < playlists.length; i++) {
-                    if (playlists[i].name === "Recent Songs")
+                    if (playlists[i].name === "Recent Songs") {
                         contains = true;
+                        playlistId = playlists[i].id;
+                    }
                 }
 
                 handlePlaylist(access_token, contains);
@@ -151,6 +154,7 @@
 
       function handlePlaylist(access_token, contains) {
           if (contains) {
+              deleteSongs(access_token);
               getRecentSongs(access_token, 0);
           } else {
               var playlistData = {
@@ -167,6 +171,7 @@
                       'Content-type': 'application/json'
                   },
                   success: function(response) {
+                      playlistId = response.id;
                       getRecentSongs(access_token, 0);
                   },
                   error: function(response) {
@@ -178,6 +183,8 @@
       }
 
       function getRecentSongs(access_token, offset) {
+          var recentSongs;
+
           $.ajax({
               type: 'GET',
               url: 'https://api.spotify.com/v1/me/tracks',
@@ -186,7 +193,16 @@
               },
               data: { 'limit': 50, 'offset': offset },
               success: function(response) {
-                  console.log(response);
+                  recentSongs = response.items;
+
+                  var lastDay = recentSongs[49].added_at.substring(8, 10);
+                  lastDay = parseInt(lastDay);
+
+                  if (lastDay < oldDate) {
+                    recentSongs = binaryDateSearch(recentSongs);
+                  }
+
+                  addSongs(access_token, recentSongs);
               },
               error: function(response) {
                 console.log("ERROR!");
@@ -196,15 +212,57 @@
       }
 
       function processOldDate(todaysDate) {
+          var month = todaysDate.getMonth();
+          var year = todaysDate.getFullYear();
+          var monthLength;
+
+          if (year % 4 == 0)
+              monthLength = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+          else
+              monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+          var day = todaysDate.getDate();
+          oldDate = (mod((day - 8), monthLength[mod(month - 1, 12)])) + 1;
+          return oldDate;
+      }
+
+      function binaryDateSearch(songs) {
 
       }
 
-      function binaryDateSearch(songs, todaysDate) {
-          var oldDate = processOldDate(todaysDate);
+      function addSongs(access_token, songs) {
+          console.log(songs);
+          var songURIs = [];
+          for (var i = 0; i < songs.length; i++) {
+            songURIs[i] = songs[i].track.uri;
+          }
+          console.log(songURIs);
+
+          $.ajax({
+              type: 'POST',
+              url: userEndpoint + '/playlists/' + playlistId + '/tracks',
+              headers: {
+                  'Authorization': 'Bearer ' + access_token,
+                  'content-type': 'application/json'
+              },
+              data: JSON.stringify(songURIs),
+              success: function(response) {
+                  console.log("Success!");
+              },
+              error: function(reponse) {
+                  console.log(response);
+              }
+          });
+      }
+
+      function deleteSongs(access_token) {
 
       }
 
-
+      // Fix for Javascript not properly handling negative modulus
+      function mod(n, m) {
+        return ((n % m) + m) % m;
+      }
 
       // BELOW IS CODE PROVIDED BY SPOTIFY, ENTRANCE TO PROGRAM
 
