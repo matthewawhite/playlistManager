@@ -117,7 +117,7 @@
                     getPlaylists(access_token);
                 },
                 error: function(response) {
-                    console.log("ERROR!");
+                    console.log("Error retrieving user data");
                     console.log(response);
                 }
             });
@@ -145,7 +145,7 @@
                     handlePlaylist(access_token, contains);
                 },
                 error: function(response) {
-                    console.log("ERROR!");
+                    console.log("Error getting list of playlists");
                     console.log(response);
                 }
             });
@@ -153,8 +153,8 @@
 
         function handlePlaylist(access_token, contains) {
             if (contains) {
-                deleteSongs(access_token);
-                getRecentSongs(access_token, 0);
+                getPlaylistSongs(access_token, 0); //Used for deleting old playlist songs
+                getRecentSongs(access_token, 0); //Used for adding new recent songs
             } else {
                 var playlistData = {
                     'name': 'Recent Songs',
@@ -174,7 +174,7 @@
                         getRecentSongs(access_token, 0);
                     },
                     error: function(response) {
-                      console.log("ERROR!");
+                      console.log("Error adding playlist");
                       console.log(response);
                     }
                 });
@@ -205,7 +205,36 @@
                     addSongs(access_token, recentSongs, moreSongs, offset);
                 },
                 error: function(response) {
-                    console.log("ERROR!");
+                    console.log("Error retrieving songs added to My Songs");
+                    console.log(response);
+                }
+            });
+        }
+
+        function getPlaylistSongs(access_token, offset) {
+            var playlistSongs;
+            var moreSongs = false;
+
+            $.ajax({
+                type: 'GET',
+                url: userEndpoint + '/playlists/' + playlistId + '/tracks',
+                headers: {
+                    'Authorization': 'Bearer ' + access_token,
+                    'content-type': 'application/json'
+                },
+                data: { 'limit': 100, 'offset': offset },
+                success: function (response) {
+                    playlistSongs = response.items;
+
+                    if (playlistSongs.length == 100) {
+                        moreSongs = true;
+                        offset += 100;
+                    }
+
+                    deleteSongs(access_token, playlistSongs, moreSongs, offset);
+                },
+                error: function(response) {
+                    console.log("Error retrieving playlist songs");
                     console.log(response);
                 }
             });
@@ -228,9 +257,11 @@
                 },
                 data: JSON.stringify(songURIs),
                 success: function(response) {
-                    console.log('Success');
+                    console.log('Successfully added songs to playlist');
+                    console.log(response);
                 },
                 error: function(reponse) {
+                    console.log("Error adding songs to playlist");
                     console.log(response);
                 }
             });
@@ -240,9 +271,35 @@
             }
         }
 
-        function deleteSongs(access_token) {
+        function deleteSongs(access_token, songs, moreSongs, offset) {
             var songURIs = [];
-            for (var i = 0; i < songs.length; i++)
+            for (var i = 0; i < songs.length; i++) {
+                if (song[i].isTooOld()) {
+                    songURIs[i] = songs[i].track.uri;
+                }
+            }
+
+            $.ajax({
+                type: 'DELETE',
+                url: userEndpoint + '/playlists/' + playlistId + '/tracks',
+                headers: {
+                    'Authorization': 'Bearer ' + access_token,
+                    'content-type': 'application/json'
+                },
+                data: JSON.stringify(songURIs),
+                success: function(response) {
+                    console.log('Successfully deleted old songs');
+                    console.log(response);
+                },
+                error: function(reponse) {
+                    console.log('Failed to delete old playlist songs');
+                    console.log(response);
+                }
+            });
+
+            if (moreSongs) {
+                getPlaylistSongs(access_token, offset);
+            }
         }
 
         function isTooOld(songDate) {
