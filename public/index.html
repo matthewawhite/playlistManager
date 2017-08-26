@@ -195,9 +195,7 @@
                 success: function(response) {
                     recentSongs = response.items;
 
-                    var lastDay = getSongDay(recentSongs[49]);
-
-                    if (!isTooOld(lastDay.getSongDate())) {
+                    if (!isTooOld(getSongDate(recentSongs[49]))) {
                         offset += 50;
                         moreSongs = true;
                     }
@@ -243,7 +241,7 @@
         function addSongs(access_token, songs, moreSongs, offset) {
             var songURIs = [];
             for (var i = 0; i < songs.length; i++) {
-                if (!songs[i].isTooOld()) {
+                if (!isTooOld(getSongDate(songs[i]))) {
                     songURIs[i] = songs[i].track.uri;
                 }
             }
@@ -260,7 +258,7 @@
                     console.log('Successfully added songs to playlist');
                     console.log(response);
                 },
-                error: function(reponse) {
+                error: function(response) {
                     console.log("Error adding songs to playlist");
                     console.log(response);
                 }
@@ -274,7 +272,8 @@
         function deleteSongs(access_token, songs, moreSongs, offset) {
             var songURIs = [];
             for (var i = 0; i < songs.length; i++) {
-                if (song[i].isTooOld()) {
+                console.log(songs);
+                if (isTooOld(getSongDate(songs[i]))) {
                     songURIs[i] = songs[i].track.uri;
                 }
             }
@@ -291,7 +290,7 @@
                     console.log('Successfully deleted old songs');
                     console.log(response);
                 },
-                error: function(reponse) {
+                error: function(response) {
                     console.log('Failed to delete old playlist songs');
                     console.log(response);
                 }
