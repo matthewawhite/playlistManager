@@ -102,7 +102,7 @@
     <script>
         var userEndpoint = 'https://api.spotify.com/v1/users/';
         var todaysDate = new Date();
-        var oldDate = processOldDate(todaysDate, 7);
+        var numDays = 7;
         var playlistId;
 
         function getUserData(access_token) {
@@ -183,6 +183,7 @@
 
         function getRecentSongs(access_token, offset) {
             var recentSongs;
+            var moreSongs = false;
 
             $.ajax({
                 type: 'GET',
@@ -196,11 +197,12 @@
 
                     var lastDay = getSongDay(recentSongs[49]);
 
-                    if (lastDay < oldDate) { // Fix logic
-                        recentSongs = dateRange(recentSongs);
+                    if (!isTooOld(lastDay.getSongDate())) {
+                        offset += 50;
+                        moreSongs = true;
                     }
 
-                    addSongs(access_token, recentSongs);
+                    addSongs(access_token, recentSongs, moreSongs, offset);
                 },
                 error: function(response) {
                     console.log("ERROR!");
@@ -209,17 +211,12 @@
             });
         }
 
-        function dateRange(songs) {
-            var songsRange = [];
-            for (var i = 0; i < songs.length; i++) {
-                if (getSongDay(songs[i]))
-            }
-        }
-
-        function addSongs(access_token, songs) {
+        function addSongs(access_token, songs, moreSongs, offset) {
             var songURIs = [];
             for (var i = 0; i < songs.length; i++) {
-                songURIs[i] = songs[i].track.uri;
+                if (!songs[i].isTooOld()) {
+                    songURIs[i] = songs[i].track.uri;
+                }
             }
 
             $.ajax({
@@ -237,29 +234,27 @@
                     console.log(response);
                 }
             });
+
+            if (moreSongs) {
+                getRecentSongs(access_token, offset)
+            }
         }
 
         function deleteSongs(access_token) {
-
+            var songURIs = [];
+            for (var i = 0; i < songs.length; i++)
         }
 
-        function processOldDate(todaysDate, numDays) {
-            var month = todaysDate.getMonth();
-            var year = todaysDate.getFullYear();
-            var monthLength;
+        function isTooOld(songDate) {
+            var todayMs = todaysDate.getTime();
+            var songMs = songDate.getTime();
+            var sevenDayMs = numDays * 24 * 60 * 60 * 1000; //# ms in numDays
 
-            if (year % 4 == 0)
-                monthLength = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-            else
-                monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-            var day = todaysDate.getDate();
-            oldDate = (mod((day - numDays - 1), monthLength[mod(month - 1, 12)])) + 1;
-            return oldDate;
+            return (todayMs - songMs) > sevenDayMs;
         }
 
-        function getSongDay(song) {
-            return parseInt(song.added_at.substring(8, 10));
+        function getSongDate(song) {
+            return new Date(song.added_at);
         }
 
         // Fix for Javascript not properly handling negative modulus
@@ -268,7 +263,6 @@
         }
 
         // BELOW IS CODE PROVIDED BY SPOTIFY, ENTRANCE TO PROGRAM
-
         (function() {
             /**
              * Obtains parameters from the hash of the URL
